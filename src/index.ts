@@ -1,10 +1,18 @@
 import express from "express";
-import { config } from "dotenv";
-config()
+import MongoConnection from "./config/db.ts";
+import { env } from "./config/env-validator.ts";
+import setupCorsMiddleware from "./middlewares/cors-setup.ts";
 
 const app = express();
-const PORT = process.env.PORT;
+setupCorsMiddleware(app);
+app.use(express.json({ limit: "1024mb" }));
+app.use(express.urlencoded({ extended: true }));
 
-app.listen(PORT, async () =>{
-    console.log(`Server running on port ${PORT}`);
+app.listen(env.PORT, async () =>{
+    console.log(`Server running on port ${env.PORT}`);
+    try {
+        await MongoConnection.getInstance().connect();
+    } catch (error) {
+        throw new Error(`Error while connecting db`);
+    }
 });

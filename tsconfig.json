@@ -1,38 +1,40 @@
 {
   "compilerOptions": {
-    /* ---------- Project Structure ---------- */
-    "rootDir": "./src",
-    "outDir": "./dist",
+      /* ---------- Project Structure ---------- */
+      "rootDir": "./src",
+      "outDir": "./dist",
 
-    /* ---------- Runtime Environment ---------- */
-    "target": "ES2022",
-    "lib": ["ES2022"],
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "types": ["node"],
+      /* ---------- Runtime Environment ---------- */
+      "target": "ES2022",
+      "lib": ["ES2022"],
+      "module": "NodeNext",
+      "moduleResolution": "NodeNext",
+      "types": ["node"],
 
-    /* ---------- Output Behavior ---------- */
-    "sourceMap": true,
-    "declaration": true,
-    "declarationMap": true,
+      /* ---------- Output Behavior ---------- */
+      "sourceMap": true,
+      "declaration": true,
+      "declarationMap": true,
 
-    /* ---------- Type Safety ---------- */
-    "strict": true,
-    "noUncheckedIndexedAccess": true,
-    "exactOptionalPropertyTypes": true,
+      /* ---------- Type Safety ---------- */
+      "strict": true,
+      "noUncheckedIndexedAccess": true,
+      "exactOptionalPropertyTypes": true,
 
-    /* ---------- Code Quality ---------- */
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true,
+      /* ---------- Code Quality ---------- */
+      "noUnusedLocals": true,
+      "noUnusedParameters": true,
+      "noFallthroughCasesInSwitch": true,
 
-    /* ---------- Module Semantics ---------- */
-    "verbatimModuleSyntax": false,
-    "isolatedModules": true,
-    "moduleDetection": "force",
+      /* ---------- Module Semantics ---------- */
+      "verbatimModuleSyntax": true,
+      "allowImportingTsExtensions": true,
+      "isolatedModules": true,
+      "moduleDetection": "force",
+      "noEmit": true,
 
-    /* ---------- Performance ---------- */
-    "skipLibCheck": true
+      /* ---------- Performance ---------- */
+      "skipLibCheck": true
   },
   "include": ["src"],
   "exclude": ["node_modules", "dist"]
