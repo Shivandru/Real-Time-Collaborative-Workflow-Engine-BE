@@ -24,5 +24,10 @@ class NotFoundException extends HttpException {
         super(HttpStatusCodes.ClientError.NOT_FOUND, message, data);
     }
 }
+class ConflictException extends HttpException {
+  constructor(message: string = "Conflict", data: unknown = {}) {
+    super(HttpStatusCodes.ClientError.CONFLICT, message, data);
+  }
+}
 
-export { BadRequestException, UnauthorizedException, ForbiddenException, NotFoundException };
+export { BadRequestException, UnauthorizedException, ForbiddenException, NotFoundException, ConflictException };
