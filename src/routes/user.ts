@@ -9,9 +9,8 @@ const validator = createValidator();
 
 router.post("/signup", validator.body(createUserSchema), async(req, res, next)=>{
     try {
-        const { username, email, auth} = req.body;
-        const { password } = auth;
-        const user = await userservices.signUpwithLocal({ username, email, password });
+        const { username, email } = req.body;
+        const user = await userservices.handleUser({ username, email });
         res.status(HttpStatusCodes.Success.CREATED).send({
             success: true,
             data: user

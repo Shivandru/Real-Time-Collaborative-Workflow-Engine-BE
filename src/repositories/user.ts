@@ -7,30 +7,10 @@ export class UserRepository {
         return MongoConnection.getInstance().getDb().collection("users");
     }
 
-    async linkGoogle(userId: string, googleId: string){
-        try {
-            await this.collection.updateOne(
-                {userId},
-                {
-                    $set: {
-                        "auth.provider": "google",
-                        "auth.googleId": googleId,
-                    },
-                    $unset:{
-                        "auth.password": ""
-                    }
-                }
-            )
-        } catch (error) {
-            throw new Error("error while linking the user")
-        }
-    }
-
     async findByEmail(email: string): Promise<User | null>{
         try {
             const user = await this.collection.findOne({ email });
             if(!user){
-                // throw new NotFoundException(`user not found`);
                 return null;
             }
             const { _id, ...rest } = user;
@@ -44,9 +24,10 @@ export class UserRepository {
         }
     }
 
-    async createUser(user: User){
+    async createUser(user: User): Promise<User>{
         try {
             await this.collection.insertOne(user);
+            return user;
         } catch (error) {
             throw new Error("error while creating the user")
         }
