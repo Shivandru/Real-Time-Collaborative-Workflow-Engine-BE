@@ -1,7 +1,7 @@
 import MongoConnection from "../config/db.ts";
 import { userSchema, type User } from "../schemas/user.ts";
 
-export class UserRepository {
+class UserRepository {
 
     private get collection(){
         return MongoConnection.getInstance().getDb().collection("users");
@@ -42,3 +42,5 @@ export class UserRepository {
         }
     }
 }
+
+export const userRepository = new UserRepository();

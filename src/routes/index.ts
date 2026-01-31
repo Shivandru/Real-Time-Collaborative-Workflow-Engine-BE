@@ -1,6 +1,7 @@
 import { HttpStatusCodes } from "../utils/enums/http.ts";
 import AppRouter from "./AppRouter.ts";
 import userRouter from "./user.ts";
+import workspaceRouter from "./workspace.ts"
 
 const router = new AppRouter();
 
@@ -13,5 +14,6 @@ router.get("/", (_req, res, next)=>{
 })
 
 router.use("/user", userRouter);
+router.use("/workspace", workspaceRouter);
 
 export default router;

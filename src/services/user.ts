@@ -1,15 +1,14 @@
-import { UserRepository } from "../repositories/user.ts";
+import { userRepository } from "../repositories/user.ts";
 import { userSchema, type CreateUser, type User } from "../schemas/user.ts";
 import { NotFoundException } from "../utils/exceptions/client.ts";
 import { InternalServerErrorException } from "../utils/exceptions/server.ts";
 import { v4 as uuid } from "uuid";
 
 class Userservices {
-    private repo = new UserRepository();
 
     async handleUser({ username, email }: CreateUser): Promise<User> {
         try {
-            const existingUser = await this.repo.findByEmail(email);
+            const existingUser = await userRepository.findByEmail(email);
             if (existingUser) {
                 return userSchema.parse(existingUser);
             }
@@ -19,14 +18,14 @@ class Userservices {
                 userId: `u-${uuid()}`,
                 createdAt: String(Date.now()),
             }
-            return await this.repo.createUser(newUser);
+            return await userRepository.createUser(newUser);
         } catch (error) {
             throw new InternalServerErrorException(`error while creating the user`);
         }
     }
     async getUsers(){
         try {
-            const users = await this.repo.getAllUsers();
+            const users = await userRepository.getAllUsers();
             return users;
         } catch (error) {
             throw new Error(`error from get users: ${error instanceof Error ? error.message : "error while creating the user"}`);
@@ -35,7 +34,7 @@ class Userservices {
 
     async getUser(email: string){
         try {
-            const user = await this.repo.findByEmail(email);
+            const user = await userRepository.findByEmail(email);
             if(!user){
                 throw new NotFoundException("User not found");
             }
