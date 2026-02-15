@@ -3,22 +3,32 @@ import { userSchema, type CreateUser, type User } from "../schemas/user.ts";
 import { NotFoundException } from "../utils/exceptions/client.ts";
 import { InternalServerErrorException } from "../utils/exceptions/server.ts";
 import { v4 as uuid } from "uuid";
+import { jwtManager } from "../utils/helpers/jwtHelper.ts";
 
 class Userservices {
 
-    async handleUser({ username, email }: CreateUser): Promise<User> {
+    async signUpLogin({ username, email }: CreateUser): Promise<{user: User, token: string }> {
         try {
             const existingUser = await userRepository.findByEmail(email);
+            let user: User;
             if (existingUser) {
-                return userSchema.parse(existingUser);
+                user = userSchema.parse(existingUser);
+            }else{
+                const newUser: User = {
+                    username,
+                    email,
+                    userId: `u-${uuid()}`,
+                    createdAt: String(Date.now()),
+                }
+                user = await userRepository.createUser(newUser);
             }
-            const newUser: User = {
-                username,
-                email,
-                userId: `u-${uuid()}`,
-                createdAt: String(Date.now()),
-            }
-            return await userRepository.createUser(newUser);
+            
+            const token = jwtManager.generateToken({
+                userId: user.userId,
+                email: user.email,
+                username: user.username
+            });
+            return { user, token }
         } catch (error) {
             throw new InternalServerErrorException(`error while creating the user`);
         }

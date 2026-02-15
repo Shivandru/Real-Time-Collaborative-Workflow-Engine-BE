@@ -1,17 +1,15 @@
 import * as z from "zod";
-import { memberSchema } from "./workspace.ts";
-import { ObjectId } from "mongodb";
 
-export const listSchema = z.enum(["TODO", "IN_PROGRESS", "DONE"]);
 
 export const createTaskSchema = z.object({
     title: z.string(),
     description: z.string(),
-    members: z.array(memberSchema).default([]),
+    members: z.array(z.string()).default([]),
     boardId: z.string(),
-    listId: listSchema,
+    boardListId: z.string(),
     workspaceId: z.string(),
     createdBy: z.string(),
+    labels: z.array(z.string()).default([])
 });
 
 export const taskSchema = createTaskSchema.extend({
@@ -19,19 +17,36 @@ export const taskSchema = createTaskSchema.extend({
     createdAt: z.string(),
 });
 
-export const updateTaskSchema = z.object({
+export const baseTaskIdentifiers = z.object({
+    taskId: z.string(),
     workspaceId: z.string(),
     boardId: z.string(),
-    taskId: z.string(),
-    title: z.string().min(1).optional(),
-    description: z.string().min(1).optional(),
-    members: z.array(z.string()).min(1).optional(),
-    listId: listSchema.optional(),
+    boardListId: z.string(),
+    createdBy: z.string(),
+  });
+
+export const renameTaskSchema = baseTaskIdentifiers.extend({
+    title: z.string().min(2, "Title must be at least 2 characters long"),
 })
 
-export type UpdateTask = z.infer<typeof updateTaskSchema>;
+export const updateDescriptionTaskSchema = baseTaskIdentifiers.extend({
+    description: z.string(),
+})
+
+export const updateMembersSchema = baseTaskIdentifiers.extend({
+    members: z.array(z.string()).min(1, "atleast 1 member is required"),
+})
+
+export const updateLabelsSchema = baseTaskIdentifiers.extend({
+    labels: z.array(z.string()).min(1, "atleast 1 label is required"),
+})
+
+
+export type UpdateLabelsTask = z.infer<typeof updateLabelsSchema>;
+export type BaseTaskIdentifiers = z.infer<typeof baseTaskIdentifiers>;
+export type UpdateMembersTask = z.infer<typeof updateMembersSchema>;
+export type UpdateDescriptionTask = z.infer<typeof updateDescriptionTaskSchema>;
+export type RenameTask = z.infer<typeof renameTaskSchema>;
 export type CreateTask = z.infer<typeof createTaskSchema>;
 export type Task = z.infer<typeof taskSchema>;
-export type TaskDocument = Task & {
-    _id: ObjectId;
-  };
+

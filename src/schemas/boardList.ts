@@ -19,6 +19,13 @@ export const renameBoardListSchema = z.object({
     title: z.string().min(2, "Title must be at least 2 characters long"),
 })
 
+export const deleteBoardListSchema = z.object({
+    boardListId: z.string().min(1, "Board List ID is required"),
+    workspaceId: z.string().min(1, "Workspace ID is required"),
+    boardId: z.string().min(1, "Board ID is required"),
+})
+
+export type DeleteBoardList = z.infer<typeof deleteBoardListSchema>;
 export type BoardList = z.infer<typeof boardListSchema>;
 export type CreateBoardList = z.infer<typeof createboardListSchema>;
 export type RenameBoardList = z.infer<typeof renameBoardListSchema>;

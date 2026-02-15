@@ -1,28 +1,18 @@
-import { taskSchema, type CreateTask, type Task, type TaskDocument, type UpdateTask } from "../schemas/task.ts";
+import { type BaseTaskIdentifiers, type RenameTask, type Task, type UpdateDescriptionTask, type UpdateLabelsTask, type UpdateMembersTask } from "../schemas/task.ts";
 import { InternalServerErrorException } from "../utils/exceptions/server.ts";
-import {v4 as uuid} from "uuid";
+
 import MongoConnection from "../config/db.ts";
+import { NotFoundException } from "../utils/exceptions/client.ts";
 
 class TaskRepository {
 
     private get collection() {
         return MongoConnection.getInstance().getDb().collection<Task>("tasks");
     }
-    async createTask({title, description, members, boardId, listId, workspaceId, createdBy}: CreateTask): Promise<Task> {
+    async createTask(task: Task): Promise<Task> {
         try {
-            const newTask = {
-                title,
-                description,
-                members,
-                boardId,
-                listId,
-                workspaceId,
-                taskId: `t-${uuid()}`,
-                createdAt: new Date().toISOString(),
-                createdBy
-            }
-            await this.collection.insertOne(newTask);
-            return newTask;
+            await this.collection.insertOne(task);
+            return task;
         } catch (error) {
             throw new InternalServerErrorException("Internal Server Error");
         }
@@ -37,10 +27,14 @@ class TaskRepository {
         }
     }
 
-    async getTask(taskId: string): Promise<TaskDocument | null> {
+    async getTask(taskId: string): Promise<Task | null> {
         try {
             const task = await this.collection.findOne({ taskId });
-            return task ? task : null;
+            if(!task){
+                return null;
+            }
+            const { _id, ...rest } = task;
+            return rest;
         } catch (error) {
             throw new InternalServerErrorException("Internal Server Error");
         }
@@ -55,30 +49,95 @@ class TaskRepository {
         }
     }
 
-    async updateTask({ taskId, title, description, members, boardId, listId, workspaceId }: UpdateTask): Promise<TaskDocument | null> {
+    async renameTask({ taskId, workspaceId, boardId, boardListId, title }: Omit<RenameTask, "createdBy">): Promise<void> {
         try {
-            const updateQuery: any = {};
-            if(title){
-                updateQuery.$set = { title };
-            }
-            if(description){
-                updateQuery.$set = { description };
-            }
-            if(members && members.length > 0){
-                updateQuery.$addToSet = {
+            await this.collection.updateOne({
+                taskId,
+                workspaceId,
+                boardId,
+                boardListId
+            }, {
+                $set: {
+                    title
+                }
+            })
+        } catch (error) {
+            throw new InternalServerErrorException(error instanceof Error ? error.message: "Internal Server Error");
+        }
+    }
+    async updateDescription({ taskId, workspaceId, boardId, boardListId, description }: Omit<UpdateDescriptionTask, "createdBy">): Promise<void> {
+        try {
+            await this.collection.updateOne({
+                taskId,
+                workspaceId,
+                boardId,
+                boardListId
+            }, {
+                $set: {
+                    description
+                }
+            })
+        } catch (error) {
+            throw new InternalServerErrorException(error instanceof Error ? error.message: "Internal Server Error");
+        }
+    }
+
+    async updateMembers({taskId, workspaceId, boardId, boardListId, members}: Omit<UpdateMembersTask, "createdBy">): Promise<void>{
+        try {
+            const result = await this.collection.updateOne({
+                taskId,
+                workspaceId,
+                boardId,
+                boardListId,
+            }, {
+                $addToSet: {
                     members: { $each: members }
                 }
-            }
-            if(listId){
-                updateQuery.$set = { listId };
-            }
-            const updated = await this.collection.findOneAndUpdate({ taskId, boardId, workspaceId }, updateQuery, {
-                returnDocument: "after",
-                projection: { _id: 0 }
             });
-            return updated ? updated : null;
+            if (result.matchedCount === 0) {
+                throw new NotFoundException("Task not found");
+            }
         } catch (error) {
-            throw new InternalServerErrorException("Internal Server Error");
+            throw new InternalServerErrorException(error instanceof Error ? error.message: "Internal Server Error");
+        }
+    }
+
+    async updateListId({ taskId, workspaceId, boardId, boardListId }: Omit<BaseTaskIdentifiers, "createdBy">): Promise<void>{
+        try {
+            const result = await this.collection.updateOne({
+                taskId,
+                workspaceId,
+                boardId,
+            }, {
+                $set: {
+                    boardListId
+                }
+            })
+            if (result.matchedCount === 0) {
+                throw new NotFoundException("Task not found");
+            }
+        } catch (error) {
+            throw new InternalServerErrorException(error instanceof Error ? error.message: "Internal Server Error");
+        }
+    }
+
+    async updateLabels({ taskId, workspaceId, boardId, boardListId, labels }: Omit<UpdateLabelsTask, "createdBy">): Promise<void>{
+        try {
+            const result = await this.collection.updateOne({
+                taskId,
+                workspaceId,
+                boardId,
+                boardListId,
+            }, {
+                $addToSet: {
+                    labels: { $each: labels }
+                }
+            });
+            if (result.matchedCount === 0) {
+                throw new NotFoundException("Task not found");
+            }
+        } catch (error) {
+            throw new InternalServerErrorException(error instanceof Error ? error.message: "Internal Server Error");
         }
     }
 }

@@ -3,8 +3,7 @@ import cors, { type CorsOptions } from "cors";
 // import  from "@types/cors";
 
 const allowedOrigins = [
-    "*",
-    "http://localhost:5173",
+    "http://localhost:3000",
 ];
 
 const ipRegex = /^http:\/\/192\.168\.68\.\d{1,3}(:\d{1,5})?$/;

@@ -1,6 +1,6 @@
 import MongoConnection from "../config/db.ts";
 import { workspaceSchema, type AddMembers, type RemoveMember, type RenameWorkspace, type UpdateOwner, type WorkSpace } from "../schemas/workspace.ts";
-import { BadRequestException, NotFoundException } from "../utils/exceptions/client.ts";
+import { NotFoundException } from "../utils/exceptions/client.ts";
 import { InternalServerErrorException } from "../utils/exceptions/server.ts";
 
 

@@ -4,7 +4,6 @@ import { BadRequestException, NotFoundException } from "../utils/exceptions/clie
 import { InternalServerErrorException } from "../utils/exceptions/server.ts";
 import {v4 as uuid} from "uuid";
 import { activityServices } from "./activity.ts";
-import { title } from "node:process";
 
 class WorkSpaceServices {
     async createWorkspace({ title, createdBy }:CreateWorkspace): Promise<WorkSpace>{
@@ -111,6 +110,21 @@ class WorkSpaceServices {
             }
             await activityServices.createActivity({workspaceId: workspaceId, type: "WorkspaceDeleted", actor: createdBy, payload: { title: "Workspace Deleted" }});
             return deleted;
+        } catch (error) {
+            throw new InternalServerErrorException(error instanceof Error ? error.message: "Internal Server Error");
+        }
+    }
+
+    async authorizeMembers(workspaceId: string, actor: string): Promise<boolean>{
+        try {
+            const workspace = await workSpaceRepository.getWorkSpace(workspaceId);
+            if(!workspace){
+                return false;
+            }
+            if(!workspace.members.includes(actor)){
+                return false;
+            }
+            return true;
         } catch (error) {
             throw new InternalServerErrorException(error instanceof Error ? error.message: "Internal Server Error");
         }
